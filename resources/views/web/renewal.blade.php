@@ -39,7 +39,7 @@
                                     <option value="">Select Plan</option>
                                     @if(!empty($planbyop))
                                     @foreach ($planbyop as $key => $value)
-                                    <option @if(Auth::user()->plan_id === $value->plan_id) selected @endif value="{{ $value->plan_id }}">{{ $value->plan_name }}</option>
+                                    <option @if(Auth::user()->plan_id == $value->plan_id) selected @endif value="{{ $value->plan_id }}">{{ $value->plan_name }}</option>
                                     @endforeach
                                     @endif
                                 </select>
@@ -52,7 +52,7 @@
                                     <option value="">Select SubPlan</option>
                                     @if(!empty($subplanbyop))
                                     @foreach ($subplanbyop as $key => $value)
-                                    <option @if(Auth::user()->subplan_id === $value->subplan_id) selected @endif value="{{ $value->subplan_id }}">{{ $value->name }}</option>
+                                    <option @if(Auth::user()->subplan_id == $value->subplan_id) selected @endif value="{{ $value->subplan_id }}">{{ $value->name }}</option>
                                     @endforeach
                                     @endif
                                 </select>

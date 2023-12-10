@@ -5,82 +5,82 @@
 @section('content')
 
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
-    <!-- DataTables Responsive Bootstrap 5 CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
+<!-- DataTables Responsive Bootstrap 5 CSS -->
+<link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}" />
 
-    <!-- Flatpickr CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/flatpickr/flatpickr.css') }}" />
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="{{ asset('assets/vendor/libs/flatpickr/flatpickr.css') }}" />
 
-    <style>
-        table td {
-            max-width: 500px;
-            white-space: nowrap;
-            text-overflow: auto;
-            word-break: break-all;
-            overflow: hidden;
-        }
+<style>
+    table td {
+        max-width: 500px;
+        white-space: nowrap;
+        text-overflow: auto;
+        word-break: break-all;
+        overflow: hidden;
+    }
 
-        table thead {
-            max-width: 500px;
-            white-space: nowrap;
-            text-overflow: auto;
-            word-break: break-all;
-            overflow: hidden;
-            height: 20px !important;
-            font-size: 12px !important;
-            font-weight: bold !important;
-            color: rgb(12, 12, 12) !important;
-           /* background: rgb(2, 0, 36);
+    table thead {
+        max-width: 500px;
+        white-space: nowrap;
+        text-overflow: auto;
+        word-break: break-all;
+        overflow: hidden;
+        height: 20px !important;
+        font-size: 12px !important;
+        font-weight: bold !important;
+        color: rgb(12, 12, 12) !important;
+        /* background: rgb(2, 0, 36);
             background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%); */
-        }
+    }
 
-        .dt-button.buttons-csv {
-            border-radius: 55px !important;
-            background-color: #0093E9 !important;
-            background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%) !important;
-            border: none !important;
-        }
+    .dt-button.buttons-csv {
+        border-radius: 55px !important;
+        background-color: #0093E9 !important;
+        background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%) !important;
+        border: none !important;
+    }
 
-        .dt-button.buttons-pdf {
-            border-radius: 60px !important;
-            background-color: #FBAB7E !important;
-            background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%) !important;
-            border: none !important;
-        }
+    .dt-button.buttons-pdf {
+        border-radius: 60px !important;
+        background-color: #FBAB7E !important;
+        background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%) !important;
+        border: none !important;
+    }
 
-        .dt-button.buttons-colvis {
-            border-radius: 60px !important;
-            background-color: #8BC6EC !important;
-            background-image: linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%) !important;
-            border: none !important;
-        }
+    .dt-button.buttons-colvis {
+        border-radius: 60px !important;
+        background-color: #8BC6EC !important;
+        background-image: linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%) !important;
+        border: none !important;
+    }
 
-        .dt-button.buttons-colvis span {
-            color: white !important;
-        }
+    .dt-button.buttons-colvis span {
+        color: white !important;
+    }
 
-        .custom-select.custom-select-sm.form-control.form-control-sm {
-            border-radius: 50px;
-        }
+    .custom-select.custom-select-sm.form-control.form-control-sm {
+        border-radius: 50px;
+    }
 
-        .dataTables_length {
-            padding: 5px;
-        }
+    .dataTables_length {
+        padding: 5px;
+    }
 
 
-        .dataTables_scrollBody {
-            overflow-y: hidden !important;
-        }
+    .dataTables_scrollBody {
+        overflow-y: hidden !important;
+    }
 
-        .table:not(.table-dark) thead:not(.table-dark) th {
-            color: #131212 !important;
-        }
+    .table:not(.table-dark) thead:not(.table-dark) th {
+        color: #131212 !important;
+    }
 
-        .control-sm {
-            height: calc(1.25rem + 10px) !important;
-        }
-    </style>
+    .control-sm {
+        height: calc(1.25rem + 10px) !important;
+    }
+</style>
 @endsection
 
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -108,7 +108,7 @@
                     <tr>
                         <td>@if($value->username) {{ $value->username }} @else <span class="badge bg-label-danger">--N/A--</span> @endif </td>
                         <td>@if($value->pass) <span class="badge bg-label-info">{{ $value->pass }}</span> @else <span class="badge bg-label-danger">--N/A--</span>@endif</td>
-                        <td>@if($value->reply === 'Access-Accept') <span class="badge bg-label-success">ACCEPT</span>@else<span class="badge bg-label-danger">REJECT</span>@endif</td>
+                        <td>@if($value->reply == 'Access-Accept') <span class="badge bg-label-success">ACCEPT</span>@else<span class="badge bg-label-danger">REJECT</span>@endif</td>
                         <td>
                             @if($value->reply == 'Access-Accept' && $value->reply_msg == "")
                             Authenticated Successful
@@ -185,7 +185,7 @@
                                 // Get the search value
                                 $(this).attr('title', $(this).val());
                                 var regexr =
-                                '({search})'; //$(this).parents('th').find('select').val();
+                                    '({search})'; //$(this).parents('th').find('select').val();
 
                                 var cursorPosition = this.selectionStart;
                                 // Search the column for that value

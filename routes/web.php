@@ -29,5 +29,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/complaint', [DashboardController::class, 'complaint'])->name('complaint');
     Route::post('/createcomplaint', [DashboardController::class, 'createcomplaint'])->name('createcomplaint');
 });
+Route::post('/razorpaypg-status', [DashboardController::class, 'razorpaypgStatus'])->name('razorpaypg-status');
 
 require __DIR__ . '/auth.php';

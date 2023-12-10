@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Jenssegers\Agent\Agent;
 
 if (!function_exists('calculate_date_difference')) {
     function calculate_date_difference($start_date, $end_date)
@@ -22,7 +23,7 @@ if (!function_exists('calculate_date_difference')) {
         // Calculate the remaining days
         $remaining_days = $total_days - $used_days;
 
-        if ($start_timestamp === $end_timestamp) {
+        if ($start_timestamp == $end_timestamp) {
             return '<span class="badge bg-label-danger">--N/A--</span>';
         } else {
             return '<span class="badge bg-label-info">' . $used_days . ' Days || ' . $remaining_days . ' Days</span>';
@@ -61,7 +62,7 @@ if (!function_exists('getTodayUsage')) {
 if (!function_exists('convert_data_size')) {
     function convert_data_size($size_in_bits, $unit = 'auto', $decimal_places = 2)
     {
-        if ($unit === 'auto') {
+        if ($unit == 'auto') {
             if ($size_in_bits >= 1099511627776) { // 1 TB in bits
                 $unit = 'tb';
             } elseif ($size_in_bits >= 1073741824) { // 1 GB in bits
@@ -201,5 +202,117 @@ if (!function_exists('ptype')) {
         } else {
             return false;
         }
+    }
+}
+
+if (!function_exists('calculate_upcoming_datetime')) {
+    function calculate_upcoming_datetime($durationType, $durationValue, $ontimeMidnightFlag, $timestamp = null)
+    {
+
+        if ($timestamp == null) {
+            $timestamp = time();
+        }
+
+        if ($ontimeMidnightFlag == 0) {
+            switch ($durationType) {
+                case 0: // Days
+                    // Calculate the date based on days
+                    $newTimestamp = strtotime("+{$durationValue} days", $timestamp);
+                    break;
+                case 1: // Months
+                    // Calculate the date based on months
+                    $newTimestamp = strtotime("+{$durationValue} months", $timestamp);
+                    break;
+                    // Add more cases for other duration types as needed
+                default:
+                    return false;
+            }
+
+            // Set the time portion to 11:59:00
+            $newTimestamp = strtotime('23:59:00', strtotime(date('j M Y ', $newTimestamp)));
+        } else {
+            switch ($durationType) {
+                case 0: // Days
+                    // Calculate the date and time based on days
+                    $newTimestamp = strtotime("+{$durationValue} days", $timestamp);
+                    break;
+                case 1: // Months
+                    // Calculate the date and time based on months
+                    $newTimestamp = strtotime("+{$durationValue} months", $timestamp);
+                    break;
+                    // Add more cases for other duration types as needed
+                default:
+                    return false;
+            }
+        }
+
+        return date('j M Y H:i:s', $newTimestamp);
+    }
+}
+
+if (!function_exists('generate_customer_invoice_code')) {
+
+    function generate_customer_invoice_code($prefix = '', $sn = '', $parent = '')
+    {
+        // Fetch the last code from the database
+        // $query = $CI->db->where('parent_id', $parent)->select_max('invoice_code')->get('tbl_invoices');
+        // $last_code_row = $query->row();
+        $last_code_row = DB::table('tbl_invoices')->where('parent_id', $parent)->orderBy('invoice_id', 'desc')->first();
+
+        if ($last_code_row && $last_code_row->invoice_code !== null) {
+            // Extract the numeric part of the last code and increment it
+            $last_number = (int)preg_replace('/[^0-9]/', '', substr($last_code_row->invoice_code, strlen($prefix)));
+            $next_number = $last_number + 1;
+
+            // Build the next code with the provided prefix and sn
+            $next_code = $prefix . str_pad($next_number, 8, '0', STR_PAD_LEFT);
+        } else {
+            // Use $sn as the next code with prefix and str_pad
+            $next_code = $prefix . str_pad($sn, 8, '0', STR_PAD_LEFT);
+        }
+
+        return $next_code;
+    }
+}
+
+if (!function_exists('disonnectusers')) {
+    function disonnectusers($username)
+    {
+        // $details = $CI->db->where('username', $username)->where('acctstoptime IS NULL', null, false)->get('radacct');
+        $details = DB::table('radacct')->where('username', $username)->whereNull('acctstoptime')->first();
+
+        if (!empty($details)) {
+            // $query = $details->row();
+            $query = $details;
+            $nasip = $query->nasipaddress;
+            // $nas = $CI->db->where('nasname', $nasip)->get('nas')->row();
+            $nas = DB::table('nas')->where('nasname', $nasip)->first();
+            $secret = $nas->secret;
+            $ports = $nas->ports;
+            $acct = $query->acctsessionid;
+            $framedIpAddress = $query->framedipaddress;
+            shell_exec('echo User-Name=' . $username . ',Acct-Session-Id=' . $acct . ',Framed-IP-Address=' . $framedIpAddress . ' | radclient -x ' . $nasip . ':' . $ports . ' disconnect ' . $secret . '');
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+if (!function_exists('accesslog')) {
+    function accesslog($message, $id = null)
+    {
+        $agent = new Agent();
+        $clientRequest = Request();
+
+        $data = array(
+            'ipaddress' => $clientRequest->getClientIp(),
+            'browser' => $agent->browser(),
+            'os' => $agent->platform(),
+            'datetime' => date('Y-m-d H:i:s'),
+            'msg' => $message,
+            'customer_id' => $id,
+            'perform_by' => Auth::user()->id,
+        );
+        DB::table('tbl_authlogs')->insert($data);
     }
 }
