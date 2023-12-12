@@ -4,82 +4,82 @@
 
 @section('content')
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
-    <!-- DataTables Responsive Bootstrap 5 CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
+<!-- DataTables Responsive Bootstrap 5 CSS -->
+<link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}" />
 
-    <!-- Flatpickr CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/flatpickr/flatpickr.css') }}" />
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="{{ asset('assets/vendor/libs/flatpickr/flatpickr.css') }}" />
 
-    <style>
-        table td {
-            max-width: 500px;
-            white-space: nowrap;
-            text-overflow: auto;
-            word-break: break-all;
-            overflow: hidden;
-        }
+<style>
+    table td {
+        max-width: 500px;
+        white-space: nowrap;
+        text-overflow: auto;
+        word-break: break-all;
+        overflow: hidden;
+    }
 
-        table thead {
-            max-width: 500px;
-            white-space: nowrap;
-            text-overflow: auto;
-            word-break: break-all;
-            overflow: hidden;
-            height: 20px !important;
-            font-size: 12px !important;
-            font-weight: bold !important;
-            color: rgb(12, 12, 12) !important;
-            /* background: rgb(2, 0, 36);
+    table thead {
+        max-width: 500px;
+        white-space: nowrap;
+        text-overflow: auto;
+        word-break: break-all;
+        overflow: hidden;
+        height: 20px !important;
+        font-size: 12px !important;
+        font-weight: bold !important;
+        color: rgb(12, 12, 12) !important;
+        /* background: rgb(2, 0, 36);
                 background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%); */
-        }
+    }
 
-        .dt-button.buttons-csv {
-            border-radius: 55px !important;
-            background-color: #0093E9 !important;
-            background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%) !important;
-            border: none !important;
-        }
+    .dt-button.buttons-csv {
+        border-radius: 55px !important;
+        background-color: #0093E9 !important;
+        background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%) !important;
+        border: none !important;
+    }
 
-        .dt-button.buttons-pdf {
-            border-radius: 60px !important;
-            background-color: #FBAB7E !important;
-            background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%) !important;
-            border: none !important;
-        }
+    .dt-button.buttons-pdf {
+        border-radius: 60px !important;
+        background-color: #FBAB7E !important;
+        background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%) !important;
+        border: none !important;
+    }
 
-        .dt-button.buttons-colvis {
-            border-radius: 60px !important;
-            background-color: #8BC6EC !important;
-            background-image: linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%) !important;
-            border: none !important;
-        }
+    .dt-button.buttons-colvis {
+        border-radius: 60px !important;
+        background-color: #8BC6EC !important;
+        background-image: linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%) !important;
+        border: none !important;
+    }
 
-        .dt-button.buttons-colvis span {
-            color: white !important;
-        }
+    .dt-button.buttons-colvis span {
+        color: white !important;
+    }
 
-        .custom-select.custom-select-sm.form-control.form-control-sm {
-            border-radius: 50px;
-        }
+    .custom-select.custom-select-sm.form-control.form-control-sm {
+        border-radius: 50px;
+    }
 
-        .dataTables_length {
-            padding: 5px;
-        }
+    .dataTables_length {
+        padding: 5px;
+    }
 
 
-        .dataTables_scrollBody {
-            overflow-y: hidden !important;
-        }
+    .dataTables_scrollBody {
+        overflow-y: hidden !important;
+    }
 
-        .table:not(.table-dark) thead:not(.table-dark) th {
-            color: #131212 !important;
-        }
+    .table:not(.table-dark) thead:not(.table-dark) th {
+        color: #131212 !important;
+    }
 
-        .control-sm {
-            height: calc(1.25rem + 10px) !important;
-        }
-    </style>
+    .control-sm {
+        height: calc(1.25rem + 10px) !important;
+    }
+</style>
 @endsection
 
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -87,14 +87,29 @@
         All Complaints
     </h4>
 
+    @if(!$status)
+    <div class="row">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title mb-2 text-center text-danger">Permission Denied</h3>
+                </div>
+                <div class="card-body p-5 bg-danger">
+                    <h3 class="m-2 text-center text-white">Contact to Author</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    @else
     <div class="card card-action">
         <h5 class="card-header">All Complaints
+            @if($cr_status)
             <div class="card-header-elements ms-auto">
-                <button type="button" class="btn btn-xs btn-primary float-right" data-bs-toggle="modal"
-                    data-bs-target="#addNewCCModal">
+                <button type="button" class="btn btn-xs btn-primary float-right" data-bs-toggle="modal" data-bs-target="#addNewCCModal">
                     <span class="tf-icon bx bx-plus bx-xs"></span> Create
                 </button>
             </div>
+            @endif
         </h5>
         <div class="p-2 card-datatable table-responsive">
             <table id="example" class="dt-column-search table table-bordered">
@@ -111,54 +126,55 @@
                 </thead>
                 <tbody>
                     @forelse ($complaints as $value)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>
-                                @if ($value->assigned_name && $value->assigned_id)
-                                    {{ $value->assigned_name }}
-                                @else
-                                    <span class="badge bg-label-danger">--N/A--</span>
-                                @endif
-                            </td>
-                            <td>{{ $value->message }}</td>
-                            <td>
-                                @if ($value->status == 0)
-                                    <span class="badge bg-label-success">Open</span>
-                                @else
-                                    <span class="badge bg-label-danger">Closed</span>
-                                @endif
-                            </td>
-                            <td>{{ formatdatetime($value->created_at) }}</td>
-                            <td>
-                                @if ($value->updated_at)
-                                    {{ formatdatetime($value->updated_at) }}
-                                @else
-                                    <span class="badge bg-label-info">--N/A--</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if ($value->priority == 0)
-                                    <span class="badge  bg-label-info">Low</span>
-                                @elseif($value->priority == 1)
-                                    <span class="badge  bg-label-primary">Medium</span>
-                                @elseif($value->priority == 2)
-                                    <span class="badge bg-label-warning">High</span>
-                                @elseif($value->priority == 3)
-                                    <span class="badge bg-label-danger">Urgent<label>
-                                @endif
-                            </td>
-                        </tr>
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>
+                            @if ($value->assigned_name && $value->assigned_id)
+                            {{ $value->assigned_name }}
+                            @else
+                            <span class="badge bg-label-danger">--N/A--</span>
+                            @endif
+                        </td>
+                        <td>{{ $value->message }}</td>
+                        <td>
+                            @if ($value->status == 0)
+                            <span class="badge bg-label-success">Open</span>
+                            @else
+                            <span class="badge bg-label-danger">Closed</span>
+                            @endif
+                        </td>
+                        <td>{{ formatdatetime($value->created_at) }}</td>
+                        <td>
+                            @if ($value->updated_at)
+                            {{ formatdatetime($value->updated_at) }}
+                            @else
+                            <span class="badge bg-label-info">--N/A--</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if ($value->priority == 0)
+                            <span class="badge  bg-label-info">Low</span>
+                            @elseif($value->priority == 1)
+                            <span class="badge  bg-label-primary">Medium</span>
+                            @elseif($value->priority == 2)
+                            <span class="badge bg-label-warning">High</span>
+                            @elseif($value->priority == 3)
+                            <span class="badge bg-label-danger">Urgent<label>
+                                    @endif
+                        </td>
+                    </tr>
                     @empty
-                        <tr>
-                            <td colspan="7" class="text-center">No Data Found</td>
-                        </tr>
+                    <tr>
+                        <td colspan="7" class="text-center">No Data Found</td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
+    @endif
 </div>
-
+@if($cr_status)
 <div class="modal fade" id="addNewCCModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered1 modal-simple modal-add-new-cc">
         <div class="modal-content p-3 p-md-5">
@@ -175,7 +191,7 @@
                             <select class="form-select" name="template_id" id="template_id" required>
                                 <option value="">Select Reason</option>
                                 @foreach ($templates as $row)
-                                    <option value="{{ $row->complainttype_id }}">{{ $row->complaint_type }}</option>
+                                <option value="{{ $row->complainttype_id }}">{{ $row->complaint_type }}</option>
                                 @endforeach
 
                             </select>
@@ -183,8 +199,7 @@
                         <div class="mb-3">
                             <label for="complaintscomments">Message</label>
                             <div class="input-group">
-                                <textarea rows="5" id="complaintscomments" name="complaintscomments" class="form-control"
-                                    placeholder="Write Message Here" required></textarea>
+                                <textarea rows="5" id="complaintscomments" name="complaintscomments" class="form-control" placeholder="Write Message Here" required></textarea>
                                 <div class="invalid-feedback">
                                     Please provide a message.
                                 </div>
@@ -193,8 +208,7 @@
                         <div class="mb-3">
                             <div class="form-group">
                                 <label>Select Priority</label>
-                                <select class="form-control js-example-basic-single" name="priority" id="priority"
-                                    required>
+                                <select class="form-control js-example-basic-single" name="priority" id="priority" required>
                                     <option value="">Select priority</option>
                                     <option value="0">Low</option>
                                     <option value="1">Medium</option>
@@ -207,8 +221,7 @@
 
                     <div class="col-12 text-center mt-4">
                         <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
-                        <button type="reset" class="btn btn-label-secondary btn-reset" data-bs-dismiss="modal"
-                            aria-label="Close">
+                        <button type="reset" class="btn btn-label-secondary btn-reset" data-bs-dismiss="modal" aria-label="Close">
                             Cancel
                         </button>
                     </div>
@@ -217,6 +230,7 @@
         </div>
     </div>
 </div>
+@endif
 @endsection
 
 @section('scripts')

@@ -603,15 +603,24 @@ class DashboardController extends Controller
 
     public function complaint()
     {
+        $result = DB::table('tbl_subscriberportalsettings')->where('settings_id', 1)->first(['is_sub_ticket', 'al_sub_cr_ticket']);
+        $status = $result->is_sub_ticket;
+        $cr_status = $result->al_sub_cr_ticket;
+
+        if ($status) {
+            $templates = DB::table('tbl_complainttype')->where('parent_id', Auth::user()->partner_id)->get();
+            $complaints = DB::table('tbl_complaints')
+                ->leftJoin('tbl_admins', 'tbl_admins.id', '=', 'tbl_complaints.assigned_id')
+                ->leftJoin('tbl_complainttype', 'tbl_complainttype.complainttype_id', '=', 'tbl_complaints.complainttype_id')
+                ->where('tbl_complaints.customer_id', Auth::user()->id)
+                ->select('tbl_complaints.*', 'tbl_admins.name AS assigned_name', 'tbl_complainttype.complaint_type')
+                ->orderBy('tbl_complaints.complaint_id', 'DESC')
+                ->get();
+            return view('web.complaint', compact('templates', 'complaints', 'status', 'cr_status'));
+        }
+
         $templates = DB::table('tbl_complainttype')->where('parent_id', Auth::user()->partner_id)->get();
-        $complaints = DB::table('tbl_complaints')
-            ->leftJoin('tbl_admins', 'tbl_admins.id', '=', 'tbl_complaints.assigned_id')
-            ->leftJoin('tbl_complainttype', 'tbl_complainttype.complainttype_id', '=', 'tbl_complaints.complainttype_id')
-            ->where('tbl_complaints.customer_id', Auth::user()->id)
-            ->select('tbl_complaints.*', 'tbl_admins.name AS assigned_name', 'tbl_complainttype.complaint_type')
-            ->orderBy('tbl_complaints.complaint_id', 'DESC')
-            ->get();
-        return view('web.complaint', compact('templates', 'complaints'));
+        return view('web.complaint', compact('templates', 'status', 'cr_status'));
     }
 
     // public function complaintsbyid()
