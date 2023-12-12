@@ -564,17 +564,23 @@ class DashboardController extends Controller
 
     public function showInvoices()
     {
-        $user_id = Auth::user()->id;
+        $result = DB::table('tbl_subscriberportalsettings')->where('settings_id', 1)->first('is_sub_invoice');
+        $status = $result->is_sub_invoice;
 
-        $showinvoices = DB::table('tbl_invoices')
-            ->leftJoin('tbl_plan', 'tbl_invoices.plan_id', '=', 'tbl_plan.plan_id')
-            ->leftJoin('tbl_subplan', 'tbl_invoices.sub_plan_id', '=', 'tbl_subplan.subplan_id')
-            ->where('customer_id', $user_id)
-            ->select('tbl_invoices.*', 'tbl_plan.plan_name as planname', 'tbl_subplan.name as subplanname')
-            ->orderBy('invoice_id', 'DESC')
-            ->get();
+        if ($status) {
+            $user_id = Auth::user()->id;
+            $showinvoices = DB::table('tbl_invoices')
+                ->leftJoin('tbl_plan', 'tbl_invoices.plan_id', '=', 'tbl_plan.plan_id')
+                ->leftJoin('tbl_subplan', 'tbl_invoices.sub_plan_id', '=', 'tbl_subplan.subplan_id')
+                ->where('customer_id', $user_id)
+                ->select('tbl_invoices.*', 'tbl_plan.plan_name as planname', 'tbl_subplan.name as subplanname')
+                ->orderBy('invoice_id', 'DESC')
+                ->get();
 
-        return view('web.showinvoices', compact('showinvoices'));
+            return view('web.showinvoices', compact('status', 'showinvoices'));
+        }
+
+        return view('web.showinvoices', compact('status'));
     }
 
     // public function getallinvoices()

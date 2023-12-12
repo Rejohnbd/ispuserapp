@@ -15,9 +15,7 @@
                     <h3 class="card-title mb-2 text-center text-danger">Permission Denied</h3>
                 </div>
                 <div class="card-body p-5 bg-danger">
-
                     <h3 class="m-2 text-center text-white">Contact to Author</h3>
-
                 </div>
             </div>
         </div>
