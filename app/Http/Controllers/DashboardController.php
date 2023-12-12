@@ -191,10 +191,7 @@ class DashboardController extends Controller
                 }
                 $subplan_tax_price = $subplan_data->tax_price;
                 //THIS CUSTOMER OWNER
-                // $my_wallet_balance = (int) $this->db->where('u_id', $fpartnerid)->get('tbl_wallet')->row()->wallet_balance;
 
-                $myWalletBalance = DB::table('tbl_wallet')->where('u_id', $fpartnerid)->first('wallet_balance');
-                $my_wallet_balance = (int) $myWalletBalance->wallet_balance;
 
                 // $my_parent_id = $this->db->where('id', $fpartnerid)->get('tbl_admins')->row()->parent_id;
                 $myParentId = DB::table('tbl_admins')->where('id', $fpartnerid)->first('parent_id');
@@ -285,6 +282,9 @@ class DashboardController extends Controller
 
                 } else if ($utype == 1) { //FRANCHISE-LCO
                     //
+                    // $my_wallet_balance = (int) $this->db->where('u_id', $fpartnerid)->get('tbl_wallet')->row()->wallet_balance;
+                    $myWalletBalance = DB::table('tbl_wallet')->where('u_id', $fpartnerid)->first('wallet_balance');
+                    $my_wallet_balance = (int) $myWalletBalance->wallet_balance;
 
                     $base_price = (float)$subplan_data->price;
 
@@ -365,7 +365,9 @@ class DashboardController extends Controller
 
                     //     //
                 } else if ($utype == 2) { //SUB FRANCHISE-SUB LCO
-
+                    // $my_wallet_balance = (int) $this->db->where('u_id', $fpartnerid)->get('tbl_wallet')->row()->wallet_balance;
+                    $myWalletBalance = DB::table('tbl_wallet')->where('u_id', $fpartnerid)->first('wallet_balance');
+                    $my_wallet_balance = (int) $myWalletBalance->wallet_balance;
                     // $parent_wallet_balance = (int) $this->db->where('u_id', $my_parent_id)->get('tbl_wallet')->row()->wallet_balance;
                     $parentWalletBalance = DB::table('tbl_wallet')->where('u_id', $my_parent_id)->first('wallet_balance');
                     $parent_wallet_balance = (int) $parentWalletBalance->wallet_balance;
