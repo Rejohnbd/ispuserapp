@@ -19,7 +19,9 @@ class DashboardController extends Controller
 
     public function index()
     {
-        return view('web.dashboard');
+        $result = DB::table('tbl_subscriberportalsettings')->where('settings_id', 1)->first('is_sub_dash');
+        $status = $result->is_sub_dash;
+        return view('web.dashboard', compact('status'));
     }
 
     public function renewal()

@@ -7,6 +7,22 @@
     <h4 class="py-3 breadcrumb-wrapper mb-4">
         Dashboard
     </h4>
+    @if(!$status)
+    <div class="row">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title mb-2 text-center text-danger">Permission Denied</h3>
+                </div>
+                <div class="card-body p-5 bg-danger">
+
+                    <h3 class="m-2 text-center text-white">Contact to Author</h3>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    @else
     <!-- Cards with few info -->
     <div class="row">
         <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
@@ -108,7 +124,6 @@
         </div>
     </div>
     <!--/ Cards with few info -->
-
 
     <div class="row">
         <div class="col-md-6 col-lg-4 col-xl-4 mb-4 order-0">
@@ -604,5 +619,6 @@
                 </div>
             </div> --}}
     </div>
+    @endif
 </div>
 @endsection
