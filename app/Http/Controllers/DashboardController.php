@@ -541,10 +541,16 @@ class DashboardController extends Controller
 
     public function authLogs()
     {
-        $user_id = Auth::user()->id;
-        $authlogs = DB::select(DB::raw("SELECT * FROM `radpostauth` WHERE username IN (SELECT username FROM tbl_customers WHERE id = '$user_id') OR username IN (SELECT macaddress FROM tbl_customers WHERE id = '$user_id') ORDER BY radpostauth.id DESC LIMIT 200 "));
+        $result = DB::table('tbl_subscriberportalsettings')->where('settings_id', 1)->first('is_sub_cur_us');
+        $status = $result->is_sub_cur_us;
 
-        return view('web.authlogs', compact('authlogs'));
+        if ($status) {
+            $user_id = Auth::user()->id;
+            $authlogs = DB::select(DB::raw("SELECT * FROM `radpostauth` WHERE username IN (SELECT username FROM tbl_customers WHERE id = '$user_id') OR username IN (SELECT macaddress FROM tbl_customers WHERE id = '$user_id') ORDER BY radpostauth.id DESC LIMIT 200 "));
+            return view('web.authlogs', compact('authlogs', 'status'));
+        }
+
+        return view('web.authlogs', compact('status'));
     }
 
     // public function getauthlogs()
