@@ -519,9 +519,14 @@ class DashboardController extends Controller
 
     public function sessionHistory()
     {
-        $user_id = Auth::user()->id;
-        $sessionhistory = DB::select(DB::raw(" SELECT * FROM `radacct` WHERE username IN (SELECT username FROM tbl_customers WHERE id = '$user_id') OR username IN (SELECT macaddress FROM tbl_customers WHERE id = '$user_id') ORDER BY `radacctid` DESC "));
-        return view('web.session_history', compact('sessionhistory'));
+        $result = DB::table('tbl_subscriberportalsettings')->where('settings_id', 1)->first('is_sub_pre_usage');
+        $status = $result->is_sub_pre_usage;
+        if ($status) {
+            $user_id = Auth::user()->id;
+            $sessionhistory = DB::select(DB::raw(" SELECT * FROM `radacct` WHERE username IN (SELECT username FROM tbl_customers WHERE id = '$user_id') OR username IN (SELECT macaddress FROM tbl_customers WHERE id = '$user_id') ORDER BY `radacctid` DESC "));
+            return view('web.session_history', compact('sessionhistory', 'status'));
+        }
+        return view('web.session_history', compact('status'));
     }
 
 

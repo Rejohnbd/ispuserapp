@@ -85,7 +85,20 @@
     <h4 class="py-3 breadcrumb-wrapper mb-4">
         Session History
     </h4>
-
+    @if(!$status)
+    <div class="row">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title mb-2 text-center text-danger">Permission Denied</h3>
+                </div>
+                <div class="card-body p-5 bg-danger">
+                    <h3 class="m-2 text-center text-white">Contact to Author</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    @else
     <div class="card">
         <h5 class="card-header">Session History</h5>
         <div class="p-2 card-datatable table-responsive">
@@ -239,6 +252,7 @@
             </table>
         </div>
     </div>
+    @endif
 </div>
 @endsection
 
