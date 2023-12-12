@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -28,11 +29,17 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request)
     {
-        $request->authenticate();
+        $result = DB::table('tbl_subscriberportalsettings')->where('settings_id', 1)->first('is_enable');
+        if ($result->is_enable) {
+            $request->authenticate();
 
-        $request->session()->regenerate();
+            $request->session()->regenerate();
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+            return redirect()->intended(RouteServiceProvider::HOME);
+        } else {
+            flash()->addError('Permission Denied');
+            return redirect()->route('login');
+        }
     }
 
     /**
