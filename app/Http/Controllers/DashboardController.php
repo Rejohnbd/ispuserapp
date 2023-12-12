@@ -675,4 +675,34 @@ class DashboardController extends Controller
             return redirect()->back();
         }
     }
+
+    public function setting()
+    {
+        $result = DB::table('tbl_subscriberportalsettings')->where('settings_id', 1)->first('is_sub_ch_pass');
+        $status = $result->is_sub_ch_pass;
+        return view('web.setting', compact('status'));
+    }
+
+    public function settingUpdate(Request $request)
+    {
+        $validated = $request->validate([
+            'old_password' => 'required',
+            'new_password' => 'required|min:6',
+        ], [
+            'old_password.required' => 'Old Password is Required',
+            'new_password.required' => 'New Password is Required',
+            'new_password.min' => 'New Password Length Minimum 6',
+        ]);
+
+        if ($request->old_password == Auth::user()->password) {
+            DB::table('tbl_customers')->where('id', Auth::user()->id)->update([
+                'name' => $request->name,
+                'password'  => $request->new_password
+            ]);
+            flash()->addSuccess('Updated Successfully.');
+            return redirect()->back();
+        }
+        flash()->addError('Old Password Not Matched');
+        return redirect()->back();
+    }
 }

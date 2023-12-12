@@ -28,6 +28,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/show-invoices', [DashboardController::class, 'showInvoices'])->name('showinvoices');
     Route::get('/complaint', [DashboardController::class, 'complaint'])->name('complaint');
     Route::post('/createcomplaint', [DashboardController::class, 'createcomplaint'])->name('createcomplaint');
+    Route::get('setting', [DashboardController::class, 'setting'])->name('setting');
+    Route::post('setting', [DashboardController::class, 'settingUpdate'])->name('setting');
 });
 Route::post('/razorpaypg-status', [DashboardController::class, 'razorpaypgStatus'])->name('razorpaypg-status');
 

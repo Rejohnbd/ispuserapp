@@ -12,7 +12,7 @@
     <div class="card">
         <div class="card-body">
             @if(!empty($pgdetails) && $pgdetails->default_pg == 0)
-            <form action="razorpaypg/checkout" method="post">
+            <form action="{{ route('razorpaypg-checkout') }}" method="post">
                 @else
                 <form action="{{ route('razorpaypg-checkout') }}" method="post">
                     <!-- <form action="ccavenuepg/checkout" method="post"> -->
