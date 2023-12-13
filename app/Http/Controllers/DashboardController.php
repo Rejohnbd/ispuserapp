@@ -594,6 +594,44 @@ class DashboardController extends Controller
         return view('web.showinvoices', compact('status'));
     }
 
+    public function printInvoice($id)
+    {
+        try {
+            $invoiceshow = DB::table('tbl_invoices')
+                ->leftJoin('tbl_customers', 'tbl_invoices.customer_id', '=', 'tbl_customers.id')
+                ->leftJoin('tbl_admins', 'tbl_admins.id', '=', 'tbl_invoices.parent_id')
+                ->leftJoin('tbl_plan', 'tbl_invoices.plan_id', '=', 'tbl_plan.plan_id')
+                ->leftJoin('tbl_subplan', 'tbl_invoices.sub_plan_id', '=', 'tbl_subplan.subplan_id')
+                ->orderBy('tbl_invoices.invoice_id', 'desc')
+                ->where('invoice_id', decrypt($id))
+                ->select('tbl_invoices.*', 'tbl_customers.customer_id as cid', 'tbl_admins.name as partner_name', 'tbl_customers.username as cuname', 'tbl_customers.name as customername', 'tbl_customers.mobno as mobile', 'tbl_customers.email as email', 'tbl_customers.mobno as mobile', 'tbl_customers.billaddress as caddress', 'tbl_plan.plan_name as planname', 'tbl_subplan.name as suplanname')
+                ->first();
+
+            if (!empty($invoiceshow)) {
+                $partnercomp = DB::table('tbl_admins')->where('id', $invoiceshow->parent_id)->first('billing_company');
+                $billcomprofile = DB::table('tbl_companysettings')->where('company_id', $partnercomp->billing_company)->first();
+
+                if ($billcomprofile->inv_template == '0') {
+                    return view('web.finance.template0', compact('invoiceshow', 'billcomprofile'));
+                } else if ($billcomprofile->inv_template == '1') {
+                    return view('web.finance.template1', compact('invoiceshow', 'billcomprofile'));
+                } else if ($billcomprofile->inv_template == '2') {
+                    return view('web.finance.template2', compact('invoiceshow', 'billcomprofile'));
+                } else if ($billcomprofile->inv_template == '3') {
+                    return view('web.finance.template3', compact('invoiceshow', 'billcomprofile'));
+                } else {
+                    return view('web.finance.template0', compact('invoiceshow', 'billcomprofile'));
+                }
+            }
+
+            flash()->addError('Invoice Not Found');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            flash()->addError('Invoice Not Found');
+            return redirect()->back();
+        }
+    }
+
     // public function getallinvoices()
     // {
     //     $user_id = $this->session->userdata('user_id');

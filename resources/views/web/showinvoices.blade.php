@@ -44,7 +44,7 @@
                     @forelse ($showinvoices as $value)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
-                        <td></td>
+                        <td><a href="{{ route('printinvoice', encrypt($value->invoice_id)) }}" target="_blank"><i class="fas fa-file-pdf text-danger"></i></a></td>
                         <td>@if($value->invoice_code){{ $value->invoice_code }} @else<span class="badge bg-label-info">--N/A--</span>@endif</td>
                         <td>@if($value->invoice_status == '1') <span class="badge bg-label-secondary">Open</span>' @elseif(($value->invoice_status == 0))<span class="badge bg-label-secondary">Closed</span>@else<span class="badge bg-label-secondary">Canceled</span>@endif</td>
                         <td>@if($value->created_dt) {{ $value->created_dt }} @else<span class="badge bg-label-info">--N/A--</span>@endif</td>

@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/session-history', [DashboardController::class, 'sessionHistory'])->name('sessionhistory');
     Route::get('/auth-logs', [DashboardController::class, 'authLogs'])->name('authlogs');
     Route::get('/show-invoices', [DashboardController::class, 'showInvoices'])->name('showinvoices');
+    Route::get('/print-invoice/{id}', [DashboardController::class, 'printInvoice'])->name('printinvoice');
     Route::get('/complaint', [DashboardController::class, 'complaint'])->name('complaint');
     Route::post('/createcomplaint', [DashboardController::class, 'createcomplaint'])->name('createcomplaint');
     Route::get('setting', [DashboardController::class, 'setting'])->name('setting');
