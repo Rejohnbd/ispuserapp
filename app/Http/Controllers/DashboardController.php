@@ -733,6 +733,17 @@ class DashboardController extends Controller
         ]);
 
         if ($request->old_password == Auth::user()->password) {
+
+            $datam = array(
+                '{username}' => Auth::user()->username,
+                '{new_password}' => $request->new_password
+            );
+            $templateInfo = loadtemplate(9);
+            // Use the helper function to replace placeholders
+            $message = replacePlaceholders($templateInfo->template_content, $datam);
+            smssender(Auth::user()->partner_id, Auth::user()->id, Auth::user()->mobno, $message, $templateInfo->dlt_template_id);
+            whatap_message_healper(Auth::user()->mobno, $message);
+
             DB::table('tbl_customers')->where('id', Auth::user()->id)->update([
                 'name' => $request->name,
                 'password'  => $request->new_password

@@ -320,17 +320,11 @@ if (!function_exists('accesslog')) {
 if (!function_exists('get_user_status')) {
     function get_user_status($username)
     {
-        // dd($username);
-        // Check if the user is online
-        // $query = $CI->db->query("SELECT * FROM radacct WHERE username = ? AND acctstoptime IS NULL", array($username));
         $query = DB::select("SELECT * FROM radacct WHERE username = ? AND acctstoptime IS NULL", array($username));
 
         if (!empty($query)) {
             return '<span class="badge bg-label-success blink_me">Online</span>';
         } else {
-
-            // $query = $CI->db->query("SELECT MAX(acctstoptime) AS max_stoptime FROM radacct WHERE username = ?", array($username));
-            // $row = $query->row();
             $query = collect(DB::select("SELECT MAX(acctstoptime) AS max_stoptime FROM radacct WHERE username = ?", array($username)))->first();
 
             if ($query->max_stoptime !== null) {
@@ -371,5 +365,145 @@ if (!function_exists('get_user_status')) {
                 return '<span class="badge bg-label-danger blink_me">Offline</span>';
             }
         }
+    }
+}
+
+if (!function_exists('smssender')) {
+    function smssender($parent = "", $c_id = "", $mobile = "", $message = "", $templateid = "")
+    {
+        $query = DB::table('tbl_alertinfo')->where('sms_active_status', 1)->where('id', 1)->first();
+        if (!is_null($query)) {
+
+            $fast2sms = smshealper($message, $mobile, $templateid);
+
+            DB::table('tbl_smslogs')->insert([
+                'a_id' => $parent,
+                'customer_id' => $c_id,
+                'mobile_no' => $mobile,
+                'message_body' => $message,
+                'response_message' => $fast2sms,
+            ]);
+        } else {
+            return false;
+        }
+    }
+}
+
+if (!function_exists('smshealper')) {
+    function smshealper($message = "", $numbers = "", $templateid = "")
+    {
+        $gatewayres = "";
+
+        $query = DB::table('tbl_alertinfo')->where('sms_active_status', 1)->where('id', 1)->first();
+
+        if (is_null($query)) {
+            // Return an error if the gateway information is not set
+            return false;
+        } else {
+            $method = $query->sms_gateway_method;
+            $getway_url = $query->sms_gateway_url;
+
+            $datam = array(
+                '{message}' => urlencode($message),
+                '{mobile}' => $numbers,
+                '{templateid}' => $templateid
+            );
+
+            $url = replacePlaceholders($getway_url, $datam);
+            // dd($url);
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            // curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            curl_close($curl);
+
+            if ($err) {
+                $gatewayres = "cURL Error #:" . $err;
+            } else {
+                $gatewayres = $response;
+            }
+            return $gatewayres;
+        }
+    }
+}
+
+if (!function_exists('replacePlaceholders')) {
+    function replacePlaceholders($template, $replaceArray)
+    {
+        return str_replace(
+            array_keys($replaceArray),
+            array_values($replaceArray),
+            $template
+        );
+    }
+}
+
+
+if (!function_exists('loadtemplate')) {
+    function loadtemplate($templateid)
+    {
+        $template = DB::table('tbl_smstemplates')->where('template_id', $templateid)->first();
+
+        if (!is_null($template)) {
+            return $template;
+        } else {
+            return false;
+        }
+    }
+}
+
+if (!function_exists('whatap_message_healper')) {
+    function whatap_message_healper($number, $message)
+    {
+        $gatewayres = "";
+        // Fetch API configuration from the database
+        // $query = $CI->db->where('whatsapp_active_status', '1')->where('id', 1)->get('tbl_alertinfo');
+        $query =  DB::table('tbl_alertinfo')->where('whatsapp_active_status', '1')->where('id', 1)->first();
+        if (!is_null($query)) {
+
+            $api_url = $query->whatsapp_gateway_url;
+            // Data to be sent in the POST request as form data
+            $datam = array(
+                '{message}' => urlencode($message),
+                '{mobile}' => $number,
+            );
+
+            $url = replacePlaceholders($api_url, $datam);
+
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            // curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            curl_close($curl);
+
+            // Return the API response (you may want to handle this response further)
+            if ($err) {
+                $gatewayres = "cURL Error #:" . $err;
+                whatsapp_logs($number, $message, $response, Auth::user()->parent_id, Auth::user()->id);
+            } else {
+                $gatewayres = $response;
+                whatsapp_logs($number, $message, $response, Auth::user()->parent_id, Auth::user()->id);
+            }
+            return $gatewayres;
+        } else {
+            return "No configuration found in the database.";
+        }
+    }
+}
+
+if (!function_exists('whatsapp_logs')) {
+    function whatsapp_logs($mobile, $message, $response, $parent = "", $c_id = "")
+    {
+        DB::table('tbl_whatslogs')->insert([
+            'a_id' => $parent,
+            'customer_id' => $c_id,
+            'mobile_no' => $mobile,
+            'message_body' => $message,
+            'response_message' => $response,
+        ]);
     }
 }
