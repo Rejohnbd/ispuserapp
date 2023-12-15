@@ -268,6 +268,17 @@ class DashboardController extends Controller
                         // accesslog($this->session->flashdata('success'));
                         // redirect('/user/showinvoices');
 
+                        $datam = array(
+                            '{username}' => $customer_data->username,
+                            '{invoice_no}' => $data['invoice_code'],
+                            '{invoice_amount}' => $subplan_total_amount
+                        );
+                        $templateInfo = loadtemplate(8);
+                        // Use the helper function to replace placeholders
+                        $message = replacePlaceholders($templateInfo->template_content, $datam);
+                        smssender($customer_data->partner_id, $customer_data->id, $customer_data->mobno, $message, $templateInfo->dlt_template_id);
+                        whatap_message_healper($customer_data->mobno, $message);
+
                         flash()->addSuccess($renewMessage);
                         accesslog($renewMessage);
                         return redirect()->route('showinvoices');
@@ -361,6 +372,19 @@ class DashboardController extends Controller
                     //     $this->session->set_flashdata('success', $renewMessage);
                     //     accesslog($this->session->flashdata('success'));
                     //     redirect('/user/showinvoices');
+
+                    $datam = array(
+                        '{username}' => $customer_data->username,
+                        '{invoice_no}' => $data['invoice_code'],
+                        '{invoice_amount}' => $subplan_total_amount
+                    );
+                    $templateInfo = loadtemplate(8);
+                    // Use the helper function to replace placeholders
+                    $message = replacePlaceholders($templateInfo->template_content, $datam);
+                    smssender($customer_data->partner_id, $customer_data->id, $customer_data->mobno, $message, $templateInfo->dlt_template_id);
+                    whatap_message_healper($customer_data->mobno, $message);
+
+
                     flash()->addSuccess($renewMessage);
                     accesslog($renewMessage);
                     return redirect()->route('showinvoices');
@@ -476,6 +500,19 @@ class DashboardController extends Controller
                     //     $this->session->set_flashdata('success', $renewMessage);
                     //     accesslog($this->session->flashdata('success'));
                     //     redirect('/user/showinvoices');
+
+                    $datam = array(
+                        '{username}' => $customer_data->username,
+                        '{invoice_no}' => $data['invoice_code'],
+                        '{invoice_amount}' => $subplan_total_amount
+                    );
+                    $templateInfo = loadtemplate(8);
+                    // Use the helper function to replace placeholders
+                    $message = replacePlaceholders($templateInfo->template_content, $datam);
+                    smssender($customer_data->partner_id, $customer_data->id, $customer_data->mobno, $message, $templateInfo->dlt_template_id);
+                    whatap_message_healper($customer_data->mobno, $message);
+
+
                     flash()->addSuccess($renewMessage);
                     accesslog($renewMessage);
                     return redirect()->route('showinvoices');
@@ -731,9 +768,6 @@ class DashboardController extends Controller
     public function generate_unique_codeforcomplain()
     {
         $result = DB::table('tbl_complaints')->latest()->first('complain_no');
-        // dd($result);
-        // $query = $CI->db->select_max('complain_no')->get('tbl_complaints');
-        // $last_code = $query->row()->complain_no;
 
         // Extract the numeric part of the last code and increment it
         $last_number = (int)substr($result->complain_no, 2);
