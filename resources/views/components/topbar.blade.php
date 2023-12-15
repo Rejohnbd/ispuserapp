@@ -5,13 +5,26 @@
                 <i class="bx bx-menu bx-sm"></i>
             </a>
         </div>
-
         <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+                <div class="nav-item navbar-search-wrapper mb-0">
+                    @if(Auth::user()->conntype == '1' && Auth::user()->macaddress != 'na')
+                    {!! get_user_status(Auth::user()->macaddress) !!}
+                    @elseif(Auth::user()->conntype == '0')
+                    {!! get_user_status(Auth::user()->username ) !!}
+                    @else
+                    @endif
+                </div>
+            </div>
             <ul class="navbar-nav flex-row align-items-center ms-auto">
-
+                <li class="nav-item me-2 me-xl-0">
+                    <a class="nav-link style-switcher-toggle hide-arrow" href="javascript:void(0);" data-bs-original-title="" title="">
+                        <i class="bx bx-sm bx-moon"></i>
+                    </a>
+                </li>
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                        <div class="avatar avatar-online">
+                        <div class="avatar">
                             <img src="{{ asset('assets/img/avatars/1.png') }}" alt class="rounded-circle" />
                         </div>
                     </a>
@@ -20,7 +33,7 @@
                             <a class="dropdown-item" href="pages-account-settings-account.html">
                                 <div class="d-flex">
                                     <div class="flex-shrink-0 me-3">
-                                        <div class="avatar avatar-online">
+                                        <div class="avatar">
                                             <img src="{{ asset('assets/img/avatars/1.png') }}" alt class="rounded-circle" />
                                         </div>
                                     </div>

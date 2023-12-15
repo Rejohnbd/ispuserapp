@@ -316,3 +316,60 @@ if (!function_exists('accesslog')) {
         DB::table('tbl_authlogs')->insert($data);
     }
 }
+
+if (!function_exists('get_user_status')) {
+    function get_user_status($username)
+    {
+        // dd($username);
+        // Check if the user is online
+        // $query = $CI->db->query("SELECT * FROM radacct WHERE username = ? AND acctstoptime IS NULL", array($username));
+        $query = DB::select("SELECT * FROM radacct WHERE username = ? AND acctstoptime IS NULL", array($username));
+
+        if (!empty($query)) {
+            return '<span class="badge bg-label-success blink_me">Online</span>';
+        } else {
+
+            // $query = $CI->db->query("SELECT MAX(acctstoptime) AS max_stoptime FROM radacct WHERE username = ?", array($username));
+            // $row = $query->row();
+            $query = collect(DB::select("SELECT MAX(acctstoptime) AS max_stoptime FROM radacct WHERE username = ?", array($username)))->first();
+
+            if ($query->max_stoptime !== null) {
+                $stoptime = strtotime($query->max_stoptime);
+                $current_time = time();
+                $duration = $current_time - $stoptime;
+
+                $years = floor($duration / (365 * 24 * 60 * 60));
+                $duration -= $years * 365 * 24 * 60 * 60;
+                $months = floor($duration / (30 * 24 * 60 * 60));
+                $duration -= $months * 30 * 24 * 60 * 60;
+                $days = floor($duration / (24 * 60 * 60));
+                $duration -= $days * 24 * 60 * 60;
+                $hours = floor($duration / (60 * 60));
+                $duration -= $hours * 60 * 60;
+                $minutes = floor($duration / 60);
+                $seconds = $duration % 60;
+
+                $result = '';
+                if ($years > 0) {
+                    $result .= "$years Y" . ($years > 1 ? 's' : '') . ', ';
+                }
+                if ($months > 0) {
+                    $result .= "$months M" . ($months > 1 ? 's' : '') . ', ';
+                }
+                if ($days > 0) {
+                    $result .= "$days D" . ($days > 1 ? 's' : '') . ', ';
+                }
+                if ($hours > 0) {
+                    $result .= "$hours H" . ($hours > 1 ? 's' : '') . ', ';
+                }
+                if ($minutes > 0) {
+                    $result .= "$minutes Min" . ($minutes > 1 ? 's' : '') . ', ';
+                }
+                $result .= "$seconds S" . ($seconds > 1 ? 's' : '');
+                return '<span class="badge bg-label-danger blink_me">Offline (' . rtrim($result) . ')</span>';
+            } else {
+                return '<span class="badge bg-label-danger blink_me">Offline</span>';
+            }
+        }
+    }
+}

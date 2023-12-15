@@ -737,6 +737,7 @@ class DashboardController extends Controller
                 'name' => $request->name,
                 'password'  => $request->new_password
             ]);
+
             flash()->addSuccess('Updated Successfully.');
             return redirect()->back();
         }
