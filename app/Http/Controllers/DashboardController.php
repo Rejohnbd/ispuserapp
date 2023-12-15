@@ -716,6 +716,7 @@ class DashboardController extends Controller
 
     public function setting()
     {
+        dd(Auth::user()->name);
         $result = DB::table('tbl_subscriberportalsettings')->where('settings_id', 1)->first('is_sub_ch_pass');
         $status = $result->is_sub_ch_pass;
         return view('web.setting', compact('status'));
@@ -745,7 +746,6 @@ class DashboardController extends Controller
             whatap_message_healper(Auth::user()->mobno, $message);
 
             DB::table('tbl_customers')->where('id', Auth::user()->id)->update([
-                'name' => $request->name,
                 'password'  => $request->new_password
             ]);
 
