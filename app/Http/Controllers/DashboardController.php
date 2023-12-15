@@ -716,7 +716,6 @@ class DashboardController extends Controller
 
     public function setting()
     {
-        dd(Auth::user()->name);
         $result = DB::table('tbl_subscriberportalsettings')->where('settings_id', 1)->first('is_sub_ch_pass');
         $status = $result->is_sub_ch_pass;
         return view('web.setting', compact('status'));
