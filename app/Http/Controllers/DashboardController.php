@@ -702,16 +702,46 @@ class DashboardController extends Controller
             flash()->addError('All fields are Required');
             return redirect()->back();
         } else {
+            $complain_no = $this->generate_unique_codeforcomplain();
+
             DB::table('tbl_complaints')->insert([
+                'complain_no' => $complain_no,
                 'parent_id' => Auth::user()->partner_id,
                 'priority' => $request->priority,
                 'customer_id' => Auth::user()->id,
                 'complainttype_id' =>  $request->template_id,
                 'message' => $request->complaintscomments,
             ]);
+
+            $datam = array(
+                '{username}' => Auth::user()->username,
+                '{complaint_number}' => $complain_no
+            );
+            $templateInfo = loadtemplate(3);
+            // Use the helper function to replace placeholders
+            $message = replacePlaceholders($templateInfo->template_content, $datam);
+            smssender(Auth::user()->partner_id, Auth::user()->id, Auth::user()->mobno, $message, $templateInfo->dlt_template_id);
+            whatap_message_healper(Auth::user()->mobno, $message);
+
             flash()->addSuccess('Complain Submitted Successfully.');
             return redirect()->back();
         }
+    }
+
+    public function generate_unique_codeforcomplain()
+    {
+        $result = DB::table('tbl_complaints')->latest()->first('complain_no');
+        // dd($result);
+        // $query = $CI->db->select_max('complain_no')->get('tbl_complaints');
+        // $last_code = $query->row()->complain_no;
+
+        // Extract the numeric part of the last code and increment it
+        $last_number = (int)substr($result->complain_no, 2);
+        $next_number = $last_number + 1;
+
+        // done add PL then gen nex code // tested done 12:52
+        $next_code = 'CL' . str_pad($next_number, 3, '0', STR_PAD_LEFT);
+        return $next_code;
     }
 
     public function setting()
@@ -734,6 +764,10 @@ class DashboardController extends Controller
 
         if ($request->old_password == Auth::user()->password) {
 
+            DB::table('tbl_customers')->where('id', Auth::user()->id)->update([
+                'password'  => $request->new_password
+            ]);
+
             $datam = array(
                 '{username}' => Auth::user()->username,
                 '{new_password}' => $request->new_password
@@ -743,10 +777,6 @@ class DashboardController extends Controller
             $message = replacePlaceholders($templateInfo->template_content, $datam);
             smssender(Auth::user()->partner_id, Auth::user()->id, Auth::user()->mobno, $message, $templateInfo->dlt_template_id);
             whatap_message_healper(Auth::user()->mobno, $message);
-
-            DB::table('tbl_customers')->where('id', Auth::user()->id)->update([
-                'password'  => $request->new_password
-            ]);
 
             flash()->addSuccess('Updated Successfully.');
             return redirect()->back();
