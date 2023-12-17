@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Razorpay\Api\Api;
 use Validator;
+use Ixudra\Curl\Facades\Curl;
 
 class DashboardController extends Controller
 {
@@ -34,7 +36,8 @@ class DashboardController extends Controller
             $subplanprice = array();
         }
         $pgdetails = DB::table('tbl_pg')->where('pg_id', 1)->first();
-        return view('web.renewal', compact('planbyop', 'subplanbyop', 'subplanprice', 'subplanprice'));
+
+        return view('web.renewal', compact('planbyop', 'subplanbyop', 'subplanprice', 'subplanprice', 'pgdetails'));
     }
 
     public function planbyop()
@@ -146,6 +149,7 @@ class DashboardController extends Controller
             ]);
         }
     }
+
 
     public function razorpaypgStatus(Request $request)
     {
@@ -538,6 +542,136 @@ class DashboardController extends Controller
 
         return ($signature == $expected_signature);
     }
+
+    public function phonepeCheckout(Request $request)
+    {
+        $validator  = Validator::make($request->all(), [
+            'partner_id'    => 'required',
+            'id'            => 'required',
+            'mobile'        => 'required',
+            'email'         => 'required',
+            'plan_id'       => 'required',
+            'subplan_id'    => 'required',
+            'name'          => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            foreach ($validator->errors()->messages() as $key => $error) {
+                flash()->addError($error[0]);
+            }
+            return redirect()->back();
+        } else {
+            $odid =  $this->generate_p_id();
+            $query = DB::table('tbl_pg')->select('phonepe_merchant_id', 'phonepe_salt_key', 'phonepe_salt_index', 'phonepe_url')->where('pg_id', 1)->first();
+
+            if (is_null($query->phonepe_merchant_id) || is_null($query->phonepe_salt_key) || is_null($query->phonepe_salt_index) || is_null($query->phonepe_url)) {
+                flash()->addError('Please check payment gateway settings');
+                return redirect()->back();
+            }
+
+
+            $subplan_id = $request->subplan_id;
+            $amount = DB::table('tbl_subplan')->where('subplan_id', $subplan_id)->first('total_price');
+            $amount = (int)$amount->total_price * 100;
+            // dd($query->phonepe_merchant_id);
+            $data = array(
+                'merchantId' => $query->phonepe_merchant_id,
+                'merchantTransactionId' => $odid,
+                'merchantUserId' => 'MUID' . time(),
+                'amount' => $amount,
+                'redirectUrl' => route('phonepe-callback'),
+                'redirectMode' => 'POST',
+                'callbackUrl' => route('phonepe-callback'),
+                'mobileNumber' => $request->mobile,
+                'paymentInstrument' => [
+                    'type' => 'PAY_PAGE',
+                ]
+            );
+            // dd($query->phonepe_url);
+            $encode = base64_encode(json_encode($data));
+            $string = $encode . '/pg/v1/pay' . $query->phonepe_salt_key;
+            $sha256 = hash('sha256', $string);
+
+            $finalXHeader = $sha256 . '###' . $query->phonepe_salt_index;
+            // dd($finalXHeader);
+            // $response = Curl::to($query->phonepe_url)
+            //     ->withHeader('Content-Type:application/json')
+            //     ->withHeader('X-VERIFY:' . $finalXHeader)
+            //     ->withData(json_encode(['request' => $encode]))
+            //     ->post();
+
+            $headers = [
+                'Content-Type' => 'application/json',
+                'X-VERIFY' => $finalXHeader
+            ];
+
+            $response = Http::withHeaders($headers)->post($query->phonepe_url, ['request' => $encode]);
+            $rData = json_decode($response);
+
+            $advcheck = $request->has('advancedrenew') ? 1 : 0;
+
+            $dataofcustomer = array(
+                'partnerid' => $request->partner_id,
+                'custid' => $request->id,
+                'custname' => $request->name,
+                'mobile' => $request->mobile,
+                'email' => $request->email,
+                'subplan_id' => $subplan_id,
+                'advcheck' => $advcheck
+            );
+
+            session()->put('privatedetails', $dataofcustomer);
+            return redirect()->to($rData->data->instrumentResponse->redirectInfo->url);
+        }
+    }
+
+    public function phonepeCallback(Request $request)
+    {
+        $query = DB::table('tbl_pg')->select('phonepe_merchant_id', 'phonepe_merchant_user_id', 'phonepe_salt_key', 'phonepe_salt_index', 'phonepe_url')->where('pg_id', 1)->first();
+        $saltKey = $query->phonepe_salt_key;
+        $saltIndex = $query->phonepe_salt_index;
+
+        $finalXHeader = hash('sha256', '/pg/v1/status/' . $request->merchantId . '/' . $request->transactionId . $saltKey) . '###' . $saltIndex;
+
+        // $key = '53201aea-9942-482f-952a-7bc6c6102453'; // KEY
+        // $key_index = 1; // KEY_INDEX
+        // $response = $_POST; // FETCH DATA FROM DEFINE METHOD, IN THIS EXAMPLE I AM DEFINING POST WHILE I AM SENDING REQUEST
+        // $final_x_header = hash("sha256", "/pg/v1/status/" . $response['merchantId'] . "/" . $response['transactionId'] . $key_index) . "###" . $key;
+        // $url = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/" . $response['merchantId'] . "/" . $response['transactionId']; // <TESTING URL>
+        // $headers = array(
+        //     "Content-Type: application/json",
+        //     "accept: application/json",
+        //     "X-VERIFY: " . $final_x_header,
+        //     "X-MERCHANT-ID:" . $response['merchantId']
+        // );
+        // $curl = curl_init($url);
+        // curl_setopt($curl, CURLOPT_URL, $url);
+        // curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+        // curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        // curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        // $resp = curl_exec($curl);
+        // curl_close($curl);
+        // $responsePayment = json_decode($resp, true);
+
+        $headers = [
+            'Content-Type' => 'application/json',
+            'X-VERIFY' => $finalXHeader,
+            'X-MERCHANT-ID' => $request->transactionId
+        ];
+
+        $response = Http::withHeaders($headers)->get('https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/' . $request->merchantId . '/' . $request->transactionId);
+        dd(json_decode($response));
+
+        // $response = Curl::to('https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/' . $input['merchantId'] . '/' . $input['transactionId'])
+        //     ->withHeader('Content-Type:application/json')
+        //     ->withHeader('accept:application/json')
+        //     ->withHeader('X-VERIFY:' . $finalXHeader)
+        //     ->withHeader('X-MERCHANT-ID:' . $input['transactionId'])
+        //     ->get();
+
+        // dd($request->all(), json_decode($response));
+    }
+
 
     public function getSubplanbyIdfordata(Request $request)
     {

@@ -23,6 +23,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/subplanbyplanid', [DashboardController::class, 'subPlanByPlanId'])->name('subplanbyplanid');
     Route::post('/getsubplanbyidfordata', [DashboardController::class, 'getSubplanbyIdfordata'])->name('getsubplanbyidfordata');
     Route::post('/razorpaypg-checkout', [DashboardController::class, 'razorpaypgCheckout'])->name('razorpaypg-checkout');
+    Route::post('/phonepe-checkout', [DashboardController::class, 'phonepeCheckout'])->name('phonepe-checkout');
     Route::get('/session-history', [DashboardController::class, 'sessionHistory'])->name('sessionhistory');
     Route::get('/auth-logs', [DashboardController::class, 'authLogs'])->name('authlogs');
     Route::get('/show-invoices', [DashboardController::class, 'showInvoices'])->name('showinvoices');
@@ -33,5 +34,6 @@ Route::middleware('auth')->group(function () {
     Route::post('setting', [DashboardController::class, 'settingUpdate'])->name('setting');
 });
 Route::post('/razorpaypg-status', [DashboardController::class, 'razorpaypgStatus'])->name('razorpaypg-status');
+Route::post('/phonepe-callback', [DashboardController::class, 'phonepeCallback'])->name('phonepe-callback');
 
 require __DIR__ . '/auth.php';
