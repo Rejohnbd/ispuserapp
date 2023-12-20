@@ -613,12 +613,15 @@ class DashboardController extends Controller
             $dataofcustomer = array(
                 'partnerid' => $request->partner_id,
                 'custid' => $request->id,
+                'transaction_id' => $odid,
                 'custname' => $request->name,
                 'mobile' => $request->mobile,
                 'email' => $request->email,
                 'subplan_id' => $subplan_id,
                 'advcheck' => $advcheck
             );
+
+            $this->paymentStatus($request->id, $odid, 0, $request->partner_id, $request->name, $request->mobile, $subplan_id, 'Phonepe');
 
             session()->put('privatedetails', $dataofcustomer);
             return redirect()->to($rData->data->instrumentResponse->redirectInfo->url);
@@ -660,7 +663,23 @@ class DashboardController extends Controller
         ];
 
         $response = Http::withHeaders($headers)->get('https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/' . $request->merchantId . '/' . $request->transactionId);
-        dd(json_decode($response));
+        // dd(json_decode($response));
+        $result = json_decode($response);
+        if (!$result['status']) {
+        } else {
+            // $dataofcustomer = array(
+            //     'partnerid' => $request->partner_id,
+            //     'custid' => $request->id,
+            //     'transaction_id' => $odid,
+            //     'custname' => $request->name,
+            //     'mobile' => $request->mobile,
+            //     'email' => $request->email,
+            //     'subplan_id' => $subplan_id,
+            //     'advcheck' => $advcheck
+            // );
+            $this->paymentStatus($request->custid, $request->transaction_id, 2);
+        }
+
 
         // $response = Curl::to('https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/' . $input['merchantId'] . '/' . $input['transactionId'])
         //     ->withHeader('Content-Type:application/json')
@@ -672,6 +691,24 @@ class DashboardController extends Controller
         // dd($request->all(), json_decode($response));
     }
 
+    public function paymentStatus($customerId, $transactionId, $status, $partnerId = null,  $userName = null, $mobile = null,  $subplanId = null, $pamymentMethod = null)
+    {
+
+        if ($status == 0) {
+            DB::table('tbl_payment_status')->insert([
+                'partner_id' => $partnerId,
+                'customer_id' => $customerId,
+                'username' => $userName,
+                'mobile' => $mobile,
+                'transaction_id' => $transactionId,
+                'subplan_id' =>  $subplanId,
+                'status' =>  $status,
+                'pamyment_method' => $pamymentMethod
+            ]);
+        } else {
+            DB::table('tbl_payment_status')->where('customer_id', $customerId)->where('transaction_id', $transactionId)->update(['status' => $status]);
+        }
+    }
 
     public function getSubplanbyIdfordata(Request $request)
     {
